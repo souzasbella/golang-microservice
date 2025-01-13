@@ -45,7 +45,8 @@ func (s *EchoServer) registerRoutes() {
 	s.echo.GET("/liveness", s.Liveness)
 	s.echo.GET("/readiness", s.Readiness)
 
-	s.echo.GET("/customers", s.GetAllCustomers)
+	cg := s.echo.Group("/customers")
+	cg.GET("", s.GetAllCustomers)
 }
 
 func (s *EchoServer) Readiness(ctx echo.Context) error {
