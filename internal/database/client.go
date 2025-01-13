@@ -1,9 +1,11 @@
 package database
 
 import (
+	"context"
 	"fmt"
 	"time"
 
+	"github.com/souzasbella/golang-microservices/internal/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
@@ -11,6 +13,7 @@ import (
 
 type DatabaseClient interface {
 	Ready() bool
+	GetAllCustomers(ctx context.Context, email string) ([]models.Customer, error)
 }
 
 type Client struct {
@@ -18,21 +21,20 @@ type Client struct {
 }
 
 func NewDatabaseClient() (DatabaseClient, error) {
-	dsn := fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s sslmode=disable",
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=%s",
 		"localhost",
-		5431,
+		"postgres",
 		"postgres",
 		"my-postgresql",
-		"postgres",
+		5432,
+		"disable",
 	)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		SkipDefaultTransaction: false,
-		NamingStrategy:         schema.NamingStrategy{TablePrefix: "wisdom."},
-		FullSaveAssociations:   false,
-		Logger:                 nil,
+		NamingStrategy: schema.NamingStrategy{TablePrefix: "wisdom."},
 		NowFunc: func() time.Time {
 			return time.Now().UTC()
 		},
+		QueryFields: true,
 	})
 	if err != nil {
 		return nil, err
